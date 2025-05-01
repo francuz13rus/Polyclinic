@@ -10,6 +10,8 @@ namespace Polyclinic.Models
         [Required]
         public int IdUser { get; set; }
 
+        public User User { get; set; } // ✅ Навигационное свойство
+
         [Required]
         [StringLength(100)]
         public string FullName { get; set; }

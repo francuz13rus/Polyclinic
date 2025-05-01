@@ -16,7 +16,7 @@ namespace Polyclinic
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Пользователи
+            // Уникальность логина пользователя
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();

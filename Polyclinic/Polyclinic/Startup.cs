@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore; // Добавлено для UseSqlite
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Polyclinic.JWT;
-using Polyclinic;
-using System.Reflection;
 using System.Text;
-using Microsoft.AspNetCore.Builder;
-using Swashbuckle.AspNetCore.SwaggerGen; // Добавлено для Swagger
 
 namespace Polyclinic
 {
@@ -30,7 +26,7 @@ namespace Polyclinic
             // Регистрация сервиса для работы с JWT
             services.AddScoped<JwtTokenService>();
 
-            // Настройка CORS (разрешаем запросы с любых источников)
+            // Настройка CORS
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
@@ -61,13 +57,10 @@ namespace Polyclinic
                     };
                 });
 
-            // Настройка Swagger для документации API
+            // Настройка Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Clinic API", Version = "v1" });
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -95,7 +88,6 @@ namespace Polyclinic
                 });
             });
 
-            // Добавление контроллеров
             services.AddControllers();
             services.AddEndpointsApiExplorer();
         }
@@ -106,15 +98,13 @@ namespace Polyclinic
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(); // Восстановлено, так как добавлено пространство имен
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
-            // Применение CORS
             app.UseCors("CorsPolicy");
 
-            // Настройка перенаправления заголовков (если нужно для прокси)
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.All
@@ -122,11 +112,9 @@ namespace Polyclinic
 
             app.UseRouting();
 
-            // Подключение аутентификации и авторизации
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Настройка маршрутизации для контроллеров
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
