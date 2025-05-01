@@ -4,8 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Polyclinic.JWT;
+using Polyclinic;
 using System.Reflection;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.SwaggerUI;
+using Polyclinic.Models;
 
 namespace Polyclinic
 {
@@ -20,11 +25,14 @@ namespace Polyclinic
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Настройка контекста базы данных для SQLite
             services.AddDbContext<ClinicApiContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Регистрация сервиса для работы с JWT
             services.AddScoped<JwtTokenService>();
 
+            // Настройка CORS (разрешаем запросы с любых источников)
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
@@ -35,6 +43,7 @@ namespace Polyclinic
                 });
             });
 
+            // Настройка JWT-авторизации
             var jwtSettings = Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings.GetValue<string>("SecretKey");
             var key = Encoding.ASCII.GetBytes(secretKey);
@@ -54,11 +63,10 @@ namespace Polyclinic
                     };
                 });
 
+            // Настройка Swagger для документации API
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Clinic API", Version = "v1" });
-
-                // Подключение XML комментариев
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -89,12 +97,32 @@ namespace Polyclinic
                 });
             });
 
+            // Добавление контроллеров
             services.AddControllers();
             services.AddEndpointsApiExplorer();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            // Применение миграций при запуске
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ClinicApiContext>();
+                try
+                {
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    // Логирование ошибки (можно заменить на твой логгер)
+                    Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
+                    throw;
+                }
+
+                // (Опционально) Инициализация начальных данных
+                SeedData(context);
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -104,8 +132,10 @@ namespace Polyclinic
 
             app.UseHttpsRedirection();
 
+            // Применение CORS
             app.UseCors("CorsPolicy");
 
+            // Настройка перенаправления заголовков (если нужно для прокси)
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.All
@@ -113,13 +143,31 @@ namespace Polyclinic
 
             app.UseRouting();
 
+            // Подключение аутентификации и авторизации
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Настройка маршрутизации для контроллеров
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void SeedData(ClinicApiContext context)
+        {
+            // Проверка, есть ли пользователи
+            if (!context.Users.Any())
+            {
+                // Добавление тестового пользователя (пароль захеширован для примера)
+                context.Users.Add(new User
+                {
+                    Username = "admin",
+                    PasswordHash = "AQAAAAEAACcQAAAAEK...==", // Замени на реальный захешированный пароль
+                    Role = "Admin"
+                });
+                context.SaveChanges();
+            }
         }
     }
 }
