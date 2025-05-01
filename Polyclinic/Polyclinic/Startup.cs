@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore; // Добавлено для UseSqlite
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Polyclinic.JWT;
 using Polyclinic;
 using System.Reflection;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Swashbuckle.AspNetCore.SwaggerGen; // Добавлено для Swagger
 
-namespace ClinicApi
+namespace Polyclinic
 {
     public class Startup
     {
@@ -103,7 +106,7 @@ namespace ClinicApi
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(); // Восстановлено, так как добавлено пространство имен
             }
 
             app.UseHttpsRedirection();

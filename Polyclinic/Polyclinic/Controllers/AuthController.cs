@@ -1,4 +1,4 @@
-﻿using ClinicApi;
+﻿using Polyclinic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Polyclinic.Data_Transfer_Objects;

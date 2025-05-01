@@ -18,5 +18,7 @@ namespace Polyclinic.Models
         [Required]
         [StringLength(50)]
         public string Role { get; set; } // Например, "Patient" или "Doctor"
+
+        public List<Patient> Patients { get; set; } // Добавлено для связи с Patient
     }
 }
