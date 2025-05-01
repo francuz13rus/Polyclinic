@@ -15,6 +15,11 @@ namespace Polyclinic.Controllers
             _appointmentRequestService = appointmentRequestService;
         }
 
+        /// <summary>
+        /// Получить список всех заявок на приём
+        /// </summary>
+        /// <returns>Список заявок</returns>
+        /// <response code="200">Успешно получен список заявок</response>
         [HttpGet]
         public async Task<ActionResult<List<AppointmentRequestDto>>> GetAll()
         {
@@ -22,6 +27,13 @@ namespace Polyclinic.Controllers
             return Ok(requests);
         }
 
+        /// <summary>
+        /// Получить заявку по ID
+        /// </summary>
+        /// <param name="id">ID заявки</param>
+        /// <returns>Данные заявки</returns>
+        /// <response code="200">Успешно найдено</response>
+        /// <response code="404">Заявка не найдена</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<AppointmentRequestDto>> GetById(int id)
         {
@@ -30,6 +42,12 @@ namespace Polyclinic.Controllers
             return Ok(request);
         }
 
+        /// <summary>
+        /// Создать новую заявку на приём
+        /// </summary>
+        /// <param name="requestDto">Данные новой заявки</param>
+        /// <returns>Созданная заявка</returns>
+        /// <response code="201">Заявка успешно создана</response>
         [HttpPost]
         public async Task<ActionResult<AppointmentRequestDto>> Create(AppointmentRequestDto requestDto)
         {
@@ -37,6 +55,14 @@ namespace Polyclinic.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdRequest.IdRequest }, createdRequest);
         }
 
+        /// <summary>
+        /// Обновить существующую заявку
+        /// </summary>
+        /// <param name="id">ID заявки</param>
+        /// <param name="requestDto">Обновлённые данные</param>
+        /// <returns>Обновлённая заявка</returns>
+        /// <response code="200">Заявка успешно обновлена</response>
+        /// <response code="404">Заявка не найдена</response>
         [HttpPut("{id}")]
         public async Task<ActionResult<AppointmentRequestDto>> Update(int id, AppointmentRequestDto requestDto)
         {
@@ -45,6 +71,12 @@ namespace Polyclinic.Controllers
             return Ok(updatedRequest);
         }
 
+        /// <summary>
+        /// Удалить заявку по ID
+        /// </summary>
+        /// <param name="id">ID заявки</param>
+        /// <response code="204">Заявка успешно удалена</response>
+        /// <response code="404">Заявка не найдена</response>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

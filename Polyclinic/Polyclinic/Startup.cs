@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Polyclinic.JWT;
+using System.Reflection;
 using System.Text;
 
 namespace Polyclinic
@@ -19,14 +20,11 @@ namespace Polyclinic
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Настройка контекста базы данных для SQLite
             services.AddDbContext<ClinicApiContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Регистрация сервиса для работы с JWT
             services.AddScoped<JwtTokenService>();
 
-            // Настройка CORS
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
@@ -37,7 +35,6 @@ namespace Polyclinic
                 });
             });
 
-            // Настройка JWT-авторизации
             var jwtSettings = Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings.GetValue<string>("SecretKey");
             var key = Encoding.ASCII.GetBytes(secretKey);
@@ -57,10 +54,14 @@ namespace Polyclinic
                     };
                 });
 
-            // Настройка Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Clinic API", Version = "v1" });
+
+                // Подключение XML комментариев
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

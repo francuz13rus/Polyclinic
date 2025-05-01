@@ -21,17 +21,22 @@ namespace Polyclinic.Controllers
             _jwtTokenService = jwtTokenService;
         }
 
+        /// <summary>
+        /// Регистрация нового пользователя
+        /// </summary>
+        /// <param name="registerDto">Данные для регистрации</param>
+        /// <returns>JWT-токен и роль пользователя</returns>
+        /// <response code="200">Пользователь успешно зарегистрирован</response>
+        /// <response code="400">Пользователь с таким именем уже существует</response>
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto registerDto)
         {
-            // Проверка, существует ли пользователь
             if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
             {
                 return BadRequest("Пользователь с таким именем уже существует.");
             }
 
-            // Хеширование пароля (для простоты используем простой подход, в продакшене используй BCrypt или Argon2)
-            var passwordHash = Convert.ToBase64String(Encoding.UTF8.GetBytes(registerDto.Password)); // Это заглушка, замени на настоящий хешировщик
+            var passwordHash = Convert.ToBase64String(Encoding.UTF8.GetBytes(registerDto.Password)); // Заглушка
 
             var user = new User
             {
@@ -47,10 +52,16 @@ namespace Polyclinic.Controllers
             return Ok(new AuthResponseDto { Token = token, Role = user.Role });
         }
 
+        /// <summary>
+        /// Авторизация пользователя
+        /// </summary>
+        /// <param name="loginDto">Данные для входа</param>
+        /// <returns>JWT-токен и роль пользователя</returns>
+        /// <response code="200">Авторизация прошла успешно</response>
+        /// <response code="400">Неверное имя пользователя или пароль</response>
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
-            // Поиск пользователя
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
@@ -59,7 +70,6 @@ namespace Polyclinic.Controllers
                 return BadRequest("Неверное имя пользователя или пароль.");
             }
 
-            // Проверка пароля (заглушка, замени на настоящий хешировщик)
             var passwordHash = Convert.ToBase64String(Encoding.UTF8.GetBytes(loginDto.Password));
             if (user.PasswordHash != passwordHash)
             {

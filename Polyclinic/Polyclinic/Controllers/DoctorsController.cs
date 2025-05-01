@@ -15,6 +15,11 @@ namespace Polyclinic.Controllers
             _doctorService = doctorService;
         }
 
+        /// <summary>
+        /// Получить всех врачей
+        /// </summary>
+        /// <returns>Список всех врачей</returns>
+        /// <response code="200">Успешно найдено</response>
         [HttpGet]
         public async Task<ActionResult<List<DoctorDto>>> GetAll()
         {
@@ -22,6 +27,13 @@ namespace Polyclinic.Controllers
             return Ok(doctors);
         }
 
+        /// <summary>
+        /// Получить информацию о враче по идентификатору
+        /// </summary>
+        /// <param name="id">Идентификатор врача</param>
+        /// <returns>Информация о враче по указанному идентификатору</returns>
+        /// <response code="200">Успешно найдено</response>
+        /// <response code="404">Врач не найден</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<DoctorDto>> GetById(int id)
         {
@@ -30,6 +42,12 @@ namespace Polyclinic.Controllers
             return Ok(doctor);
         }
 
+        /// <summary>
+        /// Создать нового врача
+        /// </summary>
+        /// <param name="doctorDto">Данные для создания нового врача</param>
+        /// <returns>Созданный врач</returns>
+        /// <response code="201">Врач успешно создан</response>
         [HttpPost]
         public async Task<ActionResult<DoctorDto>> Create(DoctorDto doctorDto)
         {
@@ -37,6 +55,14 @@ namespace Polyclinic.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdDoctor.IdDoctor }, createdDoctor);
         }
 
+        /// <summary>
+        /// Обновить информацию о враче
+        /// </summary>
+        /// <param name="id">Идентификатор врача</param>
+        /// <param name="doctorDto">Обновлённые данные врача</param>
+        /// <returns>Обновлённая информация о враче</returns>
+        /// <response code="200">Информация о враче успешно обновлена</response>
+        /// <response code="404">Врач не найден</response>
         [HttpPut("{id}")]
         public async Task<ActionResult<DoctorDto>> Update(int id, DoctorDto doctorDto)
         {
@@ -45,6 +71,13 @@ namespace Polyclinic.Controllers
             return Ok(updatedDoctor);
         }
 
+        /// <summary>
+        /// Удалить информацию о враче
+        /// </summary>
+        /// <param name="id">Идентификатор врача</param>
+        /// <returns>Статус операции удаления</returns>
+        /// <response code="204">Врач успешно удалён</response>
+        /// <response code="404">Врач не найден</response>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
